@@ -1,3 +1,4 @@
+// app/src/main/java/com/application/isyaraapplication/features/translate/utils/CameraScreen.kt
 package com.application.isyaraapplication.features.translate.utils
 
 import android.Manifest
@@ -26,12 +27,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.application.isyaraapplication.features.viewmodel.TranslateViewModel
+import com.application.isyaraapplication.features.viewmodel.CameraViewModel
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Composable
-fun CameraScreen(viewModel: TranslateViewModel) {
+fun CameraScreen(viewModel: CameraViewModel) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by viewModel.uiState.collectAsState()

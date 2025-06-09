@@ -14,4 +14,5 @@ sealed class Screen(val route: String) {
     object Feedback : Screen("feedback_screen")
     object SIBI : Screen("sibi_screen")
     object BISINDO : Screen("bisindo_screen")
+    object Guide : Screen("guide_screen")
 }
