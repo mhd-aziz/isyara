@@ -1,10 +1,12 @@
 [versions]
+accompanistFlowlayout = "0.36.0"
 agp = "8.10.1"
 cameraCore = "1.4.2"
 coilCompose = "2.6.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
 firebaseBom = "33.15.0"
+generativeai = "0.9.0"
 hiltAndroid = "2.56.1"
 hiltCompiler = "2.56.1"
 hiltNavigationCompose = "1.2.0"
@@ -18,11 +20,11 @@ activityCompose = "1.10.1"
 composeBom = "2025.06.00"
 navigationCompose = "2.9.0"
 playServicesAuth = "21.3.0"
-tasksVision = "0.10.14"
-tensorflowLite = "2.15.0"
+tasksVision = "0.10.21"
 tensorflowLiteVersion = "2.17.0"
 
 [libraries]
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
@@ -40,6 +42,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-ml-modeldownloader = { module = "com.google.firebase:firebase-ml-modeldownloader" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
+generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -57,7 +60,6 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 tasks-vision = { module = "com.google.mediapipe:tasks-vision", version.ref = "tasksVision" }
-tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 tensorflow-lite-v2170 = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLiteVersion" }
 
 [plugins]
