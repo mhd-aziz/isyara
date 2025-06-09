@@ -7,7 +7,9 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,8 +44,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -71,7 +76,6 @@ fun RegisterScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val serverClientId = context.getString(R.string.default_web_client_id)
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -117,134 +121,138 @@ fun RegisterScreen(
         }
     }
 
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "App Logo",
-                modifier = Modifier.size(120.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = "Buat Akun Baru",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "Isi data untuk mendaftar",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(48.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (authState is State.Loading) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = { viewModel.registerUser(email, password) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text("DAFTAR", style = MaterialTheme.typography.labelLarge)
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            try {
-                                val signInIntentSender = signInClient.beginSignIn(
-                                    BeginSignInRequest.builder()
-                                        .setGoogleIdTokenRequestOptions(
-                                            BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                                                .setSupported(true)
-                                                .setServerClientId(serverClientId)
-                                                .setFilterByAuthorizedAccounts(false)
-                                                .build()
-                                        )
-                                        .setAutoSelectEnabled(true)
-                                        .build()
-                                ).await()
-                                launcher.launch(
-                                    IntentSenderRequest.Builder(
-                                        signInIntentSender?.pendingIntent?.intentSender
-                                            ?: throw ApiException(
-                                                com.google.android.gms.common.api.Status(
-                                                    CommonStatusCodes.INTERNAL_ERROR
-                                                )
-                                            )
-                                    ).build()
-                                )
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    context,
-                                    "Gagal memulai daftar Google: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.icon_google),
-                            contentDescription = "Google Logo",
-                            modifier = Modifier.size(24.dp),
-                            tint = androidx.compose.ui.graphics.Color.Unspecified
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "DAFTAR DENGAN GOOGLE",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.top_backgroung),
+                    contentDescription = "Register Background",
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth
+                )
+                Text(
+                    text = "Daftar",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Spacer(Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Sudah punya akun?")
-                TextButton(onClick = { navController.popBackStack() }) {
-                    Text("Login di sini")
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (authState is State.Loading) {
+                    CircularProgressIndicator()
+                } else {
+                    Button(
+                        onClick = { viewModel.registerUser(email, password) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    ) {
+                        Text("DAFTAR", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                try {
+                                    val signInIntentSender = signInClient.beginSignIn(
+                                        BeginSignInRequest.builder()
+                                            .setGoogleIdTokenRequestOptions(
+                                                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                                    .setSupported(true)
+                                                    .setServerClientId(serverClientId)
+                                                    .setFilterByAuthorizedAccounts(false)
+                                                    .build()
+                                            )
+                                            .setAutoSelectEnabled(true)
+                                            .build()
+                                    ).await()
+                                    launcher.launch(
+                                        IntentSenderRequest.Builder(
+                                            signInIntentSender?.pendingIntent?.intentSender
+                                                ?: throw ApiException(
+                                                    com.google.android.gms.common.api.Status(
+                                                        CommonStatusCodes.INTERNAL_ERROR
+                                                    )
+                                                )
+                                        ).build()
+                                    )
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "Gagal memulai daftar Google: ${e.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.icon_google),
+                                contentDescription = "Google Logo",
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "DAFTAR DENGAN GOOGLE",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Sudah punya akun?")
+                    TextButton(onClick = { navController.popBackStack() }) {
+                        Text("Login di sini")
+                    }
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,54 +17,66 @@ import com.application.isyaraapplication.features.auth.AuthViewModel
 import com.application.isyaraapplication.features.auth.ForgotPasswordScreen
 import com.application.isyaraapplication.features.auth.LoginScreen
 import com.application.isyaraapplication.features.auth.RegisterScreen
+import com.application.isyaraapplication.features.onboarding.OnboardingScreen
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
-fun AppNavigation(
-    viewModel: AuthViewModel = hiltViewModel()
-) {
+fun AppNavigation() {
     val navController = rememberNavController()
-    val currentUser by viewModel.user.collectAsState()
+    val context = LocalContext.current
 
-    LaunchedEffect(currentUser) {
-        if (currentUser == null) {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val currentUser by authViewModel.user.collectAsState()
+    val userPrefsRepository = EntryPointAccessors.fromActivity(
+        context as Activity,
+        MainActivity.ViewModelEntryPoint::class.java
+    ).getUserPreferencesRepository()
+    val onboardingCompleted by userPrefsRepository.onboardingCompletedFlow.collectAsState(initial = true)
+
+    val startDestination = if (!onboardingCompleted) {
+        Screen.Onboarding.route
+    } else if (currentUser == null) {
+        Screen.Login.route
+    } else {
+        Screen.Dashboard.route
+    }
+
+    LaunchedEffect(currentUser, onboardingCompleted) {
+        if (onboardingCompleted && currentUser == null) {
             navController.navigate(Screen.Login.route) {
-                popUpTo(navController.graph.id) {
+                popUpTo(navController.graph.findStartDestination().id) {
                     inclusive = true
                 }
+                launchSingleTop = true
             }
         }
     }
-    val startDestination = if (currentUser != null) Screen.Dashboard.route else Screen.Login.route
 
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
+        composable(route = Screen.Onboarding.route) {
+            OnboardingScreen(navController = navController)
+        }
         composable(route = Screen.Login.route) {
-            val context = LocalContext.current
             val hiltEntryPoint = EntryPointAccessors.fromActivity(
-                context as Activity,
+                context,
                 MainActivity.ViewModelEntryPoint::class.java
             )
-            val signInClient = hiltEntryPoint.getSignInClient()
-
             LoginScreen(
                 navController = navController,
-                signInClient = signInClient
+                signInClient = hiltEntryPoint.getSignInClient()
             )
         }
         composable(route = Screen.Register.route) {
-            val context = LocalContext.current
             val hiltEntryPoint = EntryPointAccessors.fromActivity(
-                context as Activity,
+                context,
                 MainActivity.ViewModelEntryPoint::class.java
             )
-            val signInClient = hiltEntryPoint.getSignInClient()
-
             RegisterScreen(
                 navController = navController,
-                signInClient = signInClient
+                signInClient = hiltEntryPoint.getSignInClient()
             )
         }
         composable(route = Screen.ForgotPassword.route) {

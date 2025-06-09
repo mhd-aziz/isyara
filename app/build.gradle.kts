@@ -64,6 +64,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore)
     implementation(libs.play.services.auth)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -73,4 +74,6 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.tasks.vision)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.datastore.preferences)
 }
