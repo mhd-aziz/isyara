@@ -31,7 +31,7 @@ fun BottomNavGraph(
             DictionaryScreen()
         }
         composable(route = BottomNavItem.Translate.route) {
-            TranslateScreen()
+            TranslateScreen(navController = appNavController)
         }
         composable(route = BottomNavItem.History.route) {
             HistoryScreen()

@@ -22,7 +22,10 @@ import com.application.isyaraapplication.features.settings.AboutScreen
 import com.application.isyaraapplication.features.settings.ChangeThemeScreen
 import com.application.isyaraapplication.features.settings.EditPasswordScreen
 import com.application.isyaraapplication.features.settings.EditProfileScreen
+import com.application.isyaraapplication.features.settings.FeedbackScreen
 import com.application.isyaraapplication.features.settings.LanguageScreen
+import com.application.isyaraapplication.features.translate.BISINDOScreen
+import com.application.isyaraapplication.features.translate.SIBIScreen
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
@@ -87,11 +90,9 @@ fun AppNavigation() {
         composable(route = Screen.ForgotPassword.route) {
             ForgotPasswordScreen(navController = navController)
         }
-
         composable(route = Screen.Dashboard.route) {
             MainScreen(appNavController = navController)
         }
-
         composable(route = Screen.EditProfile.route) {
             EditProfileScreen(navController = navController)
         }
@@ -104,8 +105,17 @@ fun AppNavigation() {
         composable(route = Screen.ChangeTheme.route) {
             ChangeThemeScreen(navController = navController)
         }
+        composable(route = Screen.Feedback.route) {
+            FeedbackScreen(navController = navController)
+        }
         composable(route = Screen.About.route) {
-            AboutScreen()
+            AboutScreen(navController = navController)
+        }
+        composable(route = Screen.SIBI.route) {
+            SIBIScreen(navController = navController)
+        }
+        composable(route = Screen.BISINDO.route) {
+            BISINDOScreen(navController = navController)
         }
     }
 }
