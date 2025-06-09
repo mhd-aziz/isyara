@@ -11,4 +11,7 @@ sealed class Screen(val route: String) {
     object Language : Screen("language_screen")
     object About : Screen("about_screen")
     object ChangeTheme : Screen("change_theme_screen")
+    object Feedback : Screen("feedback_screen")
+    object SIBI : Screen("sibi_screen")
+    object BISINDO : Screen("bisindo_screen")
 }

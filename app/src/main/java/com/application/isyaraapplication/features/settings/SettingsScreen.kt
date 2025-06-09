@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
@@ -124,6 +125,11 @@ fun SettingsScreen(
                 icon = Icons.Default.Palette,
                 title = "Tema",
                 onClick = { navController.navigate(Screen.ChangeTheme.route) }
+            )
+            SettingItem(
+                icon = Icons.Default.Feedback,
+                title = "Kirim Masukan",
+                onClick = { navController.navigate(Screen.Feedback.route) }
             )
             SettingItem(
                 icon = Icons.Default.Info,
