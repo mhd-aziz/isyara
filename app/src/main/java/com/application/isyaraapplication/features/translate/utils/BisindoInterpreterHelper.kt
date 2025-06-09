@@ -74,8 +74,8 @@ class BisindoInterpreterHelper(
 
         if (result.landmarks().isNotEmpty()) {
             result.landmarks().forEachIndexed { handIndex, landmarks ->
-                if (handIndex < result.handedness().size) {
-                    val handedness = result.handedness()[handIndex][0].categoryName()
+                if (handIndex < result.handednesses().size) {
+                    val handedness = result.handednesses()[handIndex][0].categoryName()
                     val tempLandmarks = FloatArray(numCoordsPerHand)
                     landmarks.forEachIndexed { landmarkIndex, landmark ->
                         tempLandmarks[landmarkIndex * 3] = landmark.x()

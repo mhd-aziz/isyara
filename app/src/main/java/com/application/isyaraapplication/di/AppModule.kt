@@ -1,7 +1,9 @@
 package com.application.isyaraapplication.di
 
 import android.content.Context
+import com.application.isyaraapplication.BuildConfig
 import com.application.isyaraapplication.data.local.UserPreferencesRepository
+import com.google.ai.client.generativeai.GenerativeModel
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
@@ -41,4 +43,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideGenerativeModel(): GenerativeModel {
+        return GenerativeModel(
+            modelName = "gemini-2.0-flash",
+            apiKey = BuildConfig.GEMINI_API_KEY
+        )
+    }
 }

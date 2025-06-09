@@ -1,6 +1,8 @@
 package com.application.isyaraapplication.features.translate
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,9 +11,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,9 +42,13 @@ fun BISINDOScreen(
     viewModel: TranslateViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        viewModel.setInterpreter()
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.onErrorShown()
+        }
     }
 
     Scaffold(
@@ -48,6 +58,15 @@ fun BISINDOScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.flipCamera() }) {
+                        Icon(
+                            imageVector = Icons.Default.Cameraswitch,
+                            contentDescription = "Balik Kamera",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -63,7 +82,6 @@ fun BISINDOScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // CameraScreen dan HandLandmarkerResultView tetap sama
             CameraScreen(viewModel = viewModel)
             HandLandmarkerResultView(result = uiState.result)
 
@@ -79,15 +97,24 @@ fun BISINDOScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = uiState.fullPrediction.ifEmpty { "Arahkan tangan ke kamera..." },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 72.dp)
-                            .verticalScroll(rememberScrollState()),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = if (uiState.fullPrediction.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = uiState.fullPrediction.ifEmpty { "Arahkan tangan ke kamera..." },
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 72.dp)
+                                .verticalScroll(rememberScrollState()),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = if (uiState.fullPrediction.isEmpty()) Color.Gray else MaterialTheme.colorScheme.onSurface
+                        )
+                        AnimatedVisibility(visible = uiState.isSpellChecking) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(start = 8.dp)
+                            )
+                        }
+                    }
 
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -103,10 +130,23 @@ fun BISINDOScreen(
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = "Live: ${uiState.currentLetter} (${String.format("%.0f", uiState.predictionConfidence * 100)}%)",
+                                text = "Live: ${uiState.currentLetter} (${
+                                    String.format(
+                                        "%.0f",
+                                        uiState.predictionConfidence * 100
+                                    )
+                                }%)",
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        IconButton(onClick = { viewModel.toggleSpellCheck() }) {
+                            Icon(
+                                imageVector = Icons.Default.Spellcheck,
+                                contentDescription = "Koreksi Ejaan",
+                                tint = if (uiState.isSpellCheckEnabled) MaterialTheme.colorScheme.primary else Color.Gray
                             )
                         }
 
