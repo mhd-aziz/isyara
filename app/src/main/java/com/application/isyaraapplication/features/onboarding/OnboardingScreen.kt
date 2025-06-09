@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.application.isyaraapplication.R
+import com.application.isyaraapplication.features.viewmodel.OnboardingViewModel
 import com.application.isyaraapplication.navigation.Screen
 import kotlinx.coroutines.delay
 

@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.application.isyaraapplication.R
 import com.application.isyaraapplication.core.State
+import com.application.isyaraapplication.features.viewmodel.AuthViewModel
 import com.application.isyaraapplication.navigation.Screen
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient

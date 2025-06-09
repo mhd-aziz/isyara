@@ -1,7 +1,11 @@
 package com.application.isyaraapplication.features.settings
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -9,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
@@ -24,13 +27,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.application.isyaraapplication.core.State
+import com.application.isyaraapplication.R
+import com.application.isyaraapplication.features.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +49,11 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val profileState by viewModel.profileState.collectAsState()
     val saveState by viewModel.saveState.collectAsState()
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        viewModel.onPhotoUriChange(uri)
+    }
 
     LaunchedEffect(saveState) {
         when (val state = saveState) {
@@ -93,6 +106,7 @@ fun EditProfileScreen(
                     val fullName by viewModel.fullName.collectAsState()
                     val phoneNumber by viewModel.phoneNumber.collectAsState()
                     val bio by viewModel.bio.collectAsState()
+                    val newPhotoUri by viewModel.photoUri.collectAsState()
 
                     Column(
                         modifier = Modifier
@@ -105,20 +119,29 @@ fun EditProfileScreen(
                                 .align(Alignment.CenterHorizontally)
                                 .padding(vertical = 16.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
+                            AsyncImage(
+                                model = newPhotoUri ?: user.photoUrl,
                                 contentDescription = "Profile Picture",
                                 modifier = Modifier
                                     .size(120.dp)
-                                    .clip(CircleShape),
-                                tint = MaterialTheme.colorScheme.primary
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable {
+                                        imagePickerLauncher.launch("image/*")
+                                    },
+                                contentScale = ContentScale.Crop,
+                                placeholder = painterResource(id = R.drawable.ic_placeholder_image),
+                                error = painterResource(id = R.drawable.ic_error_image)
                             )
-                            IconButton(
-                                onClick = { /* TODO: Logika untuk ganti foto profil */ },
+                            Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .background(MaterialTheme.colorScheme.surface, CircleShape)
                                     .size(36.dp)
+                                    .clickable {
+                                        imagePickerLauncher.launch("image/*")
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
@@ -127,7 +150,6 @@ fun EditProfileScreen(
                                 )
                             }
                         }
-
                         OutlinedTextField(
                             value = user.email ?: "Tidak ada email",
                             onValueChange = {},
@@ -212,6 +234,7 @@ fun EditProfileScreen(
                                 )
                             }
                         }
+
                     }
                 }
 

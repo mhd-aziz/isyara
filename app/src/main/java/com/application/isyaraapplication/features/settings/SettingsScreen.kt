@@ -3,14 +3,16 @@ package com.application.isyaraapplication.features.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,12 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.application.isyaraapplication.features.auth.AuthViewModel
+import coil.compose.AsyncImage
+import com.application.isyaraapplication.R
+import com.application.isyaraapplication.features.viewmodel.AuthViewModel
 import com.application.isyaraapplication.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +57,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
         ) {
             Column(
@@ -60,13 +66,16 @@ fun SettingsScreen(
                     .padding(vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
+                AsyncImage(
+                    model = currentUser?.photoUrl,
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(100.dp)
-                        .clip(CircleShape),
-                    tint = MaterialTheme.colorScheme.primary
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.ic_placeholder_image),
+                    error = painterResource(id = R.drawable.ic_error_image)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -80,7 +89,6 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
-
             Text(
                 text = "AKUN",
                 style = MaterialTheme.typography.labelMedium,
@@ -113,12 +121,17 @@ fun SettingsScreen(
                 onClick = { navController.navigate(Screen.Language.route) }
             )
             SettingItem(
+                icon = Icons.Default.Palette,
+                title = "Tema",
+                onClick = { navController.navigate(Screen.ChangeTheme.route) }
+            )
+            SettingItem(
                 icon = Icons.Default.Info,
                 title = "Tentang Aplikasi",
                 onClick = { navController.navigate(Screen.About.route) }
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             SettingItem(
                 icon = Icons.AutoMirrored.Filled.Logout,

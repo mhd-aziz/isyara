@@ -1,5 +1,6 @@
-package com.application.isyaraapplication.features.settings
+package com.application.isyaraapplication.features.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.isyaraapplication.core.State
@@ -22,8 +23,6 @@ class ProfileViewModel @Inject constructor(
     private val _saveState = MutableStateFlow<State<Unit>>(State.Idle)
     val saveState = _saveState.asStateFlow()
 
-    val currentUser = profileRepository.loadUserProfile()
-
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
 
@@ -35,6 +34,9 @@ class ProfileViewModel @Inject constructor(
 
     private val _bio = MutableStateFlow("")
     val bio = _bio.asStateFlow()
+
+    private val _photoUri = MutableStateFlow<Uri?>(null)
+    val photoUri = _photoUri.asStateFlow()
 
     init {
         loadProfile()
@@ -71,6 +73,10 @@ class ProfileViewModel @Inject constructor(
         _bio.value = newBio
     }
 
+    fun onPhotoUriChange(newUri: Uri?) {
+        _photoUri.value = newUri
+    }
+
     fun saveProfile() {
         viewModelScope.launch {
             _saveState.value = State.Loading
@@ -78,7 +84,8 @@ class ProfileViewModel @Inject constructor(
                 username = _username.value,
                 fullName = _fullName.value,
                 phoneNumber = _phoneNumber.value,
-                bio = _bio.value
+                bio = _bio.value,
+                photoUri = _photoUri.value
             )
             _saveState.value = result
         }

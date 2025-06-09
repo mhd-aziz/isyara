@@ -1,4 +1,4 @@
-package com.application.isyaraapplication.features.onboarding
+package com.application.isyaraapplication.features.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

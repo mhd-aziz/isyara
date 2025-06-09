@@ -13,11 +13,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.application.isyaraapplication.MainActivity
 import com.application.isyaraapplication.features.MainScreen
-import com.application.isyaraapplication.features.auth.AuthViewModel
+import com.application.isyaraapplication.features.viewmodel.AuthViewModel
 import com.application.isyaraapplication.features.auth.ForgotPasswordScreen
 import com.application.isyaraapplication.features.auth.LoginScreen
 import com.application.isyaraapplication.features.auth.RegisterScreen
 import com.application.isyaraapplication.features.onboarding.OnboardingScreen
+import com.application.isyaraapplication.features.settings.AboutScreen
+import com.application.isyaraapplication.features.settings.ChangeThemeScreen
+import com.application.isyaraapplication.features.settings.EditPasswordScreen
+import com.application.isyaraapplication.features.settings.EditProfileScreen
+import com.application.isyaraapplication.features.settings.LanguageScreen
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
@@ -82,8 +87,25 @@ fun AppNavigation() {
         composable(route = Screen.ForgotPassword.route) {
             ForgotPasswordScreen(navController = navController)
         }
+
         composable(route = Screen.Dashboard.route) {
-            MainScreen()
+            MainScreen(appNavController = navController)
+        }
+
+        composable(route = Screen.EditProfile.route) {
+            EditProfileScreen(navController = navController)
+        }
+        composable(route = Screen.EditPassword.route) {
+            EditPasswordScreen(navController = navController)
+        }
+        composable(route = Screen.Language.route) {
+            LanguageScreen()
+        }
+        composable(route = Screen.ChangeTheme.route) {
+            ChangeThemeScreen(navController = navController)
+        }
+        composable(route = Screen.About.route) {
+            AboutScreen()
         }
     }
 }
