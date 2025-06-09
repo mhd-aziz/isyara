@@ -1,6 +1,7 @@
 package com.application.isyaraapplication.data.repository
 
 import com.application.isyaraapplication.core.State
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import com.google.firebase.auth.FirebaseUser
@@ -52,6 +53,26 @@ class AuthRepository @Inject constructor(
             State.Success(Unit)
         } catch (e: Exception) {
             State.Error(e.localizedMessage ?: "Gagal mengirim email reset password.")
+        }
+    }
+
+    suspend fun updatePassword(oldPassword: String, newPassword: String): State<Unit> {
+        return try {
+            val user = auth.currentUser
+            if (user?.email == null) {
+                return State.Error("Pengguna tidak ditemukan atau tidak memiliki email terdaftar.")
+            }
+            val credential = EmailAuthProvider.getCredential(user.email!!, oldPassword)
+            user.reauthenticate(credential).await()
+            user.updatePassword(newPassword).await()
+
+            State.Success(Unit)
+        } catch (e: Exception) {
+            val errorMessage = when (e) {
+                is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "Password lama yang Anda masukkan salah."
+                else -> e.localizedMessage ?: "Gagal memperbarui password."
+            }
+            State.Error(errorMessage)
         }
     }
 

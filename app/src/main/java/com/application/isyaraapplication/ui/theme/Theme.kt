@@ -43,16 +43,23 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun IsyaraApplicationTheme(
-    darkTheme: Boolean = false,
+    themeOption: String = "System",
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val useDarkTheme = when (themeOption) {
+        "Light" -> false
+        "Dark" -> true
+        else -> isSystemInDarkTheme()
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
+
+        useDarkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
     val view = LocalView.current
@@ -60,7 +67,8 @@ fun IsyaraApplicationTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
+                !useDarkTheme
         }
     }
 
