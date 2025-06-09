@@ -1,0 +1,262 @@
+@file:Suppress("DEPRECATION")
+
+package com.application.isyaraapplication.features.auth
+
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.application.isyaraapplication.R
+import com.application.isyaraapplication.core.State
+import com.application.isyaraapplication.navigation.Screen
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
+@Composable
+fun LoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel(),
+    signInClient: SignInClient
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val authState by viewModel.authState.collectAsState()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val serverClientId = context.getString(R.string.default_web_client_id)
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            coroutineScope.launch {
+                try {
+                    val credential = signInClient.getSignInCredentialFromIntent(result.data)
+                    val idToken = credential.googleIdToken
+                    if (idToken != null) {
+                        viewModel.signInWithGoogle(idToken)
+                    } else {
+                        throw ApiException(
+                            com.google.android.gms.common.api.Status(
+                                CommonStatusCodes.INTERNAL_ERROR
+                            )
+                        )
+                    }
+                } catch (e: ApiException) {
+                    Toast.makeText(
+                        context,
+                        "Login Google gagal: ${e.statusCode}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is State.Success -> {
+                Toast.makeText(context, "Login Berhasil!", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.Dashboard.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                }
+            }
+
+            is State.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            }
+
+            else -> Unit
+        }
+    }
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(120.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "Selamat Datang Kembali",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Login untuk melanjutkan",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(48.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                singleLine = true
+            )
+            TextButton(
+                onClick = {
+                    navController.navigate(Screen.ForgotPassword.route)
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Lupa Password?")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (authState is State.Loading) {
+                CircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = { viewModel.loginUser(email, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("LOGIN", style = MaterialTheme.typography.labelLarge)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                val signInIntentSender = signInClient.beginSignIn(
+                                    BeginSignInRequest.builder()
+                                        .setGoogleIdTokenRequestOptions(
+                                            BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                                .setSupported(true)
+                                                .setServerClientId(serverClientId)
+                                                .setFilterByAuthorizedAccounts(false)
+                                                .build()
+                                        )
+                                        .setAutoSelectEnabled(true)
+                                        .build()
+                                ).await()
+
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(
+                                        signInIntentSender?.pendingIntent?.intentSender
+                                            ?: throw ApiException(
+                                                com.google.android.gms.common.api.Status(
+                                                    CommonStatusCodes.INTERNAL_ERROR
+                                                )
+                                            )
+                                    ).build()
+                                )
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    context,
+                                    "Gagal memulai login Google: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_google),
+                            contentDescription = "Google Logo",
+                            modifier = Modifier.size(24.dp),
+                            tint = androidx.compose.ui.graphics.Color.Unspecified
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "LOGIN DENGAN GOOGLE",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Belum punya akun?")
+                TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
+                    Text("Daftar di sini")
+                }
+            }
+        }
+    }
+}
