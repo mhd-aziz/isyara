@@ -80,10 +80,6 @@ class HandLandmarkerHelper(
         }
     }
 
-    /**
-     * Fungsi yang sudah dioptimalkan.
-     * Membuat bitmap dan matriks hanya sekali dan menggunakannya kembali untuk setiap frame.
-     */
     @SuppressLint("UseKtx")
     fun detectLiveStream(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         if (runningMode != RunningMode.LIVE_STREAM || handLandmarker == null) {
@@ -150,7 +146,7 @@ class HandLandmarkerHelper(
         private const val FRAME_PROCESSING_INTERVAL_MS = 100L
         const val DELEGATE_CPU = 0
         const val DELEGATE_GPU = 1
-        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
+        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.7F
         const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
         const val DEFAULT_NUM_HANDS = 2

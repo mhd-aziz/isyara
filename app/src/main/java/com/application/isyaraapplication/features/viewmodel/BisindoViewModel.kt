@@ -8,8 +8,8 @@ import com.application.isyaraapplication.core.State
 import com.application.isyaraapplication.data.repository.TranslateRepository
 import com.application.isyaraapplication.features.translate.utils.BisindoInterpreterHelper
 import com.application.isyaraapplication.features.translate.utils.HandLandmarkerHelper
+import com.application.isyaraapplication.features.translate.utils.TranslatorUiState
 import com.google.mediapipe.tasks.vision.core.RunningMode
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -26,16 +26,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
-class TranslateViewModel @Inject constructor(
+class BisindoViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val translateRepository: TranslateRepository
-) : ViewModel(), HandLandmarkerHelper.LandmarkerListener {
+) : ViewModel(), HandLandmarkerHelper.LandmarkerListener, CameraViewModel {
 
     private val _uiState = MutableStateFlow(TranslatorUiState())
-    val uiState = _uiState.asStateFlow()
+    override val uiState = _uiState.asStateFlow()
     private var handLandmarkerHelper: HandLandmarkerHelper? = null
     private var bisindoInterpreterHelper: BisindoInterpreterHelper? = null
-    val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    override val cameraExecutor: ExecutorService =
+        Executors.newSingleThreadExecutor()
     private var spellCheckJob: Job? = null
     private var lastPredictedLetter: String = ""
     private var spaceJustAdded = AtomicBoolean(false)
@@ -46,7 +47,7 @@ class TranslateViewModel @Inject constructor(
             handLandmarkerHelper = HandLandmarkerHelper(
                 context = context,
                 runningMode = RunningMode.LIVE_STREAM,
-                handLandmarkerHelperListener = this@TranslateViewModel
+                handLandmarkerHelperListener = this@BisindoViewModel
             )
             bisindoInterpreterHelper = try {
                 BisindoInterpreterHelper(context = context)
@@ -58,7 +59,10 @@ class TranslateViewModel @Inject constructor(
         }
     }
 
-    fun detectLiveStream(imageProxy: ImageProxy, isFrontCamera: Boolean) {
+    override fun detectLiveStream(
+        imageProxy: ImageProxy,
+        isFrontCamera: Boolean
+    ) {
         handLandmarkerHelper?.detectLiveStream(imageProxy, isFrontCamera) ?: imageProxy.close()
     }
 
@@ -112,7 +116,7 @@ class TranslateViewModel @Inject constructor(
                     currentPrediction != "..." &&
                     currentPrediction != "?" &&
                     currentPrediction != lastPredictedLetter &&
-                    (currentTime - lastPredictionTimestamp > 1000)
+                    (currentTime - lastPredictionTimestamp > 1500)
                 ) {
                     lastPredictedLetter = currentPrediction
                     lastPredictionTimestamp = currentTime
@@ -129,7 +133,7 @@ class TranslateViewModel @Inject constructor(
 
         spellCheckJob?.cancel()
         spellCheckJob = viewModelScope.launch {
-            delay(2000L)
+            delay(3000L)
             if (_uiState.value.fullPrediction.trim().isNotBlank()) {
                 spellCheck()
             }
@@ -208,14 +212,3 @@ class TranslateViewModel @Inject constructor(
     }
 }
 
-data class TranslatorUiState(
-    val result: HandLandmarkerResult? = null,
-    val currentLetter: String = "",
-    val fullPrediction: String = "",
-    val predictionConfidence: Float = 0.5f,
-    val error: String? = null,
-    val isSpellChecking: Boolean = false,
-    val isSpellCheckEnabled: Boolean = false,
-    val isFrontCamera: Boolean = true,
-    val isInitializing: Boolean = true
-)

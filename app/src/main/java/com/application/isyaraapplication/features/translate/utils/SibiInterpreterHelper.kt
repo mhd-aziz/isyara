@@ -7,11 +7,12 @@ import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import kotlin.math.sqrt
 import org.tensorflow.lite.Interpreter
 
-class BisindoInterpreterHelper(
+class SibiInterpreterHelper(
     val context: Context,
-    val modelPath: String = "model_bisindo.tflite",
+    val modelPath: String = "model_sibi.tflite",
     val confidenceThreshold: Float = 0.5F
 ) {
     private var interpreter: Interpreter? = null
@@ -34,9 +35,12 @@ class BisindoInterpreterHelper(
                 )
             val interpreterOptions = Interpreter.Options()
             interpreter = Interpreter(modelBuffer, interpreterOptions)
-            Log.d(TAG, "Custom TFLite model ($modelPath) loaded successfully.")
+            Log.d(TAG, "Custom TFLite model SIBI ($modelPath) loaded successfully.")
         } catch (e: Exception) {
-            throw IllegalStateException("Error initializing TFLite interpreter: ${e.message}", e)
+            throw IllegalStateException(
+                "Error initializing TFLite SIBI interpreter: ${e.message}",
+                e
+            )
         }
     }
 
@@ -46,7 +50,7 @@ class BisindoInterpreterHelper(
 
         if (interpreter != null && result.landmarks().isNotEmpty()) {
             val features = extractAndNormalizeFeatures(result)
-            val inputBuffer = ByteBuffer.allocateDirect(126 * 4).order(ByteOrder.nativeOrder())
+            val inputBuffer = ByteBuffer.allocateDirect(42 * 4).order(ByteOrder.nativeOrder())
             inputBuffer.asFloatBuffer().put(features)
 
             val outputArray = Array(1) { FloatArray(26) }
@@ -68,52 +72,41 @@ class BisindoInterpreterHelper(
     }
 
     private fun extractAndNormalizeFeatures(result: HandLandmarkerResult): FloatArray {
-        val numCoordsPerHand = 21 * 3
-        val leftHandLandmarks = FloatArray(numCoordsPerHand)
-        val rightHandLandmarks = FloatArray(numCoordsPerHand)
+        val numCoords = 21 * 2
+        val landmarks = FloatArray(numCoords)
 
         if (result.landmarks().isNotEmpty()) {
-            result.landmarks().forEachIndexed { handIndex, landmarks ->
-                if (handIndex < result.handedness().size) {
-                    val handedness = result.handedness()[handIndex][0].categoryName()
-                    val tempLandmarks = FloatArray(numCoordsPerHand)
-                    landmarks.forEachIndexed { landmarkIndex, landmark ->
-                        tempLandmarks[landmarkIndex * 3] = landmark.x()
-                        tempLandmarks[landmarkIndex * 3 + 1] = landmark.y()
-                        tempLandmarks[landmarkIndex * 3 + 2] = landmark.z()
-                    }
-                    if (handedness == "Right") {
-                        System.arraycopy(tempLandmarks, 0, leftHandLandmarks, 0, numCoordsPerHand)
-                    } else if (handedness == "Left") {
-                        System.arraycopy(tempLandmarks, 0, rightHandLandmarks, 0, numCoordsPerHand)
-                    }
+            val firstHand = result.landmarks().first()
+            val wristX = firstHand[0].x()
+            val wristY = firstHand[0].y()
+
+            val translatedLandmarks = mutableListOf<Float>()
+            firstHand.forEach { landmark ->
+                translatedLandmarks.add(landmark.x() - wristX)
+                translatedLandmarks.add(landmark.y() - wristY)
+            }
+
+            var maxDist = 0f
+            for (i in translatedLandmarks.indices step 2) {
+                val x = translatedLandmarks[i]
+                val y = translatedLandmarks[i + 1]
+                val dist = sqrt(x * x + y * y)
+                if (dist > maxDist) {
+                    maxDist = dist
                 }
             }
-        }
 
-        val wristLeft =
-            floatArrayOf(leftHandLandmarks[0], leftHandLandmarks[1], leftHandLandmarks[2])
-        if (wristLeft.any { it != 0f }) {
-            for (i in 0 until 21) {
-                leftHandLandmarks[i * 3] -= wristLeft[0]
-                leftHandLandmarks[i * 3 + 1] -= wristLeft[1]
-                leftHandLandmarks[i * 3 + 2] -= wristLeft[2]
+            if (maxDist < 1e-8) {
+                return FloatArray(numCoords)
+            }
+
+            for (i in translatedLandmarks.indices) {
+                landmarks[i] = translatedLandmarks[i] / maxDist
             }
         }
 
-        val wristRight =
-            floatArrayOf(rightHandLandmarks[0], rightHandLandmarks[1], rightHandLandmarks[2])
-        if (wristRight.any { it != 0f }) {
-            for (i in 0 until 21) {
-                rightHandLandmarks[i * 3] -= wristRight[0]
-                rightHandLandmarks[i * 3 + 1] -= wristRight[1]
-                rightHandLandmarks[i * 3 + 2] -= wristRight[2]
-            }
-        }
-
-        return leftHandLandmarks + rightHandLandmarks
+        return landmarks
     }
-
 
     fun close() {
         interpreter?.close()
@@ -123,6 +116,6 @@ class BisindoInterpreterHelper(
     data class ClassificationResult(val predictedLetter: String, val confidence: Float)
 
     companion object {
-        private const val TAG = "BisindoInterpreterHelper"
+        private const val TAG = "SibiInterpreterHelper"
     }
 }

@@ -13,10 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,14 +32,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.application.isyaraapplication.features.translate.utils.CameraScreen
 import com.application.isyaraapplication.features.translate.utils.HandLandmarkerResultView
-import com.application.isyaraapplication.features.viewmodel.TranslateViewModel
+import com.application.isyaraapplication.features.viewmodel.BisindoViewModel
+import com.application.isyaraapplication.navigation.Screen
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BISINDOScreen(
     navController: NavController,
-    viewModel: TranslateViewModel = hiltViewModel()
+    viewModel: BisindoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -65,6 +66,13 @@ fun BISINDOScreen(
                         Icon(
                             imageVector = Icons.Default.Cameraswitch,
                             contentDescription = "Balik Kamera",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(Screen.Guide.route) }) {
+                        Icon(
+                            imageVector = Icons.Default.HelpOutline,
+                            contentDescription = "Panduan",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }

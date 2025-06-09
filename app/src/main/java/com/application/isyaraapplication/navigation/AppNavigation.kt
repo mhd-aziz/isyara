@@ -26,6 +26,7 @@ import com.application.isyaraapplication.features.settings.FeedbackScreen
 import com.application.isyaraapplication.features.settings.LanguageScreen
 import com.application.isyaraapplication.features.translate.BISINDOScreen
 import com.application.isyaraapplication.features.translate.SIBIScreen
+import com.application.isyaraapplication.features.translate.utils.GuideScreen
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
@@ -116,6 +117,9 @@ fun AppNavigation() {
         }
         composable(route = Screen.BISINDO.route) {
             BISINDOScreen(navController = navController)
+        }
+        composable(route = Screen.Guide.route) {
+            GuideScreen(navController = navController)
         }
     }
 }
