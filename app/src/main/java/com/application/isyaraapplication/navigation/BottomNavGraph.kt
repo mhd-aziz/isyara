@@ -10,7 +10,7 @@ import com.application.isyaraapplication.features.auth.AuthViewModel
 import com.application.isyaraapplication.features.dashboard.DashboardScreen
 import com.application.isyaraapplication.features.dictionary.DictionaryScreen
 import com.application.isyaraapplication.features.history.HistoryScreen
-import com.application.isyaraapplication.features.settings.SettingsScreen
+import com.application.isyaraapplication.features.settings.*
 import com.application.isyaraapplication.features.translate.TranslateScreen
 
 @Composable
@@ -33,7 +33,20 @@ fun BottomNavGraph(navController: NavHostController, modifier: Modifier = Modifi
             HistoryScreen()
         }
         composable(route = BottomNavItem.Settings.route) {
-            SettingsScreen(viewModel = hiltViewModel<AuthViewModel>())
+            SettingsScreen(navController = navController, viewModel = hiltViewModel<AuthViewModel>())
+        }
+
+        composable(route = Screen.EditProfile.route) {
+            EditProfileScreen(navController = navController)
+        }
+        composable(route = Screen.EditPassword.route) {
+            EditPasswordScreen()
+        }
+        composable(route = Screen.Language.route) {
+            LanguageScreen()
+        }
+        composable(route = Screen.About.route) {
+            AboutScreen()
         }
     }
 }
