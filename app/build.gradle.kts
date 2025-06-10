@@ -93,7 +93,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.coil.compose)
+    implementation(libs.coil.video)
     implementation(libs.firebase.storage)
     implementation(libs.accompanist.flowlayout)
     implementation(libs.generativeai)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 }

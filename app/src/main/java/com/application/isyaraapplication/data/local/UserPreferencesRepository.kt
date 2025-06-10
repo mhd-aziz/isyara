@@ -1,4 +1,3 @@
-// app/src/main/java/com/application/isyaraapplication/data/local/UserPreferencesRepository.kt
 package com.application.isyaraapplication.data.local
 
 import android.content.Context
