@@ -28,7 +28,7 @@ fun BottomNavGraph(
             DashboardScreen(viewModel = hiltViewModel<AuthViewModel>())
         }
         composable(route = BottomNavItem.Dictionary.route) {
-            DictionaryScreen()
+            DictionaryScreen(navController = appNavController)
         }
         composable(route = BottomNavItem.Translate.route) {
             TranslateScreen(navController = appNavController)
