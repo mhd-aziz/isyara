@@ -48,7 +48,7 @@ class DictionaryViewModel @Inject constructor(
             val url = repository.getDownloadUrl(path)
             urlCache[path] = url
             url
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
