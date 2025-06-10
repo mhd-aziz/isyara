@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.application.isyaraapplication.R
 import com.application.isyaraapplication.core.State
 import com.application.isyaraapplication.data.model.DictionaryItem
-import com.application.isyaraapplication.features.utils.shimmerEffect
+import com.application.isyaraapplication.features.dictionary.utils.shimmerEffect
 import com.application.isyaraapplication.features.viewmodel.DictionaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,12 +147,9 @@ private fun AlphabetCard(
     onClick: (String) -> Unit
 ) {
     var imageUrl by remember { mutableStateOf<String?>(null) }
-    var isLoadingUrl by remember { mutableStateOf(true) }
 
     LaunchedEffect(item.url) {
-        isLoadingUrl = true
         imageUrl = viewModel.getUrlForPath(item.url)
-        isLoadingUrl = false
     }
 
     Card(
@@ -169,36 +166,31 @@ private fun AlphabetCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Gambar isyarat untuk ${item.name}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isLoadingUrl) {
-                    Spacer(modifier = Modifier
-                        .fillMaxSize()
-                        .shimmerEffect())
-                } else if (imageUrl != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
-                            .crossfade(true)
-                            .build(),
-                        placeholder = painterResource(R.drawable.ic_placeholder_image),
-                        error = painterResource(R.drawable.ic_error_image),
-                        contentDescription = "Gambar isyarat untuk ${item.name}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                loading = {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .shimmerEffect()
                     )
-                } else {
+                },
+                error = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_error_image),
+                        painter = painterResource(id = R.drawable.ic_placeholder_image),
                         contentDescription = "Gagal memuat gambar",
                         modifier = Modifier.size(48.dp)
                     )
                 }
-            }
+            )
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.headlineSmall,
@@ -219,11 +211,11 @@ fun EnlargedImageDialog(imageUrl: String, onDismiss: () -> Unit) {
                 .background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = imageUrl,
                 contentDescription = "Gambar diperbesar",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
             )
             IconButton(
                 onClick = onDismiss,

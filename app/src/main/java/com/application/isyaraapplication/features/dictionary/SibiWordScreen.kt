@@ -1,5 +1,6 @@
 package com.application.isyaraapplication.features.dictionary
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,16 +41,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import com.application.isyaraapplication.R
 import com.application.isyaraapplication.core.State
 import com.application.isyaraapplication.data.model.DictionaryItem
-import com.application.isyaraapplication.features.utils.ShimmerLoadingList
-import com.application.isyaraapplication.features.utils.shimmerEffect
+import com.application.isyaraapplication.features.dictionary.utils.ShimmerLoadingList
+import com.application.isyaraapplication.features.dictionary.utils.shimmerEffect
 import com.application.isyaraapplication.features.viewmodel.DictionaryViewModel
 import com.application.isyaraapplication.navigation.Screen
 
@@ -155,12 +160,9 @@ fun WordVideoCard(
     navController: NavController
 ) {
     var videoUrl by remember { mutableStateOf<String?>(null) }
-    var isLoadingUrl by remember { mutableStateOf(true) }
 
     LaunchedEffect(item.url) {
-        isLoadingUrl = true
         videoUrl = viewModel.getUrlForPath(item.url)
-        isLoadingUrl = false
     }
 
     Card(
@@ -174,43 +176,65 @@ fun WordVideoCard(
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            if (isLoadingUrl || videoUrl == null) {
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(videoUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Thumbnail untuk ${item.name}",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            loading = {
                 Spacer(
                     modifier = Modifier
                         .fillMaxSize()
                         .shimmerEffect()
                 )
-            } else {
-                AsyncImage(
-                    model = videoUrl,
-                    contentDescription = "Thumbnail untuk ${item.name}",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+            },
+            success = {
+                Image(
+                    painter = it.painter,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayCircleFilled,
+                        contentDescription = "Putar Video",
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(16.dp)
+                    )
+                }
+            },
+            error = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_placeholder_image),
+                        contentDescription = "Gagal memuat thumbnail",
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-            )
-            if (!isLoadingUrl) {
-                Icon(
-                    imageVector = Icons.Default.PlayCircleFilled,
-                    contentDescription = "Putar Video",
-                    tint = Color.White.copy(alpha = 0.9f),
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp)
-            )
-        }
+        )
     }
 }

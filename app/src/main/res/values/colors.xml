@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary_blue">#0097B2</color>
+    <color name="secondary_cyan">#5CE1E6</color>
+    <color name="tertiary_yellow">#FFBD59</color>
+    <color name="background_light">#F7F2F9</color>
+    <color name="surface_light">#F7F2F9</color>
+
+    <color name="primary_dark">#7DD0E0</color>
+    <color name="secondary_dark">#5CE1E6</color>
+    <color name="tertiary_dark">#FFBD59</color>
+    <color name="background_dark">#141218</color>
+    <color name="surface_dark">#141218</color>
+
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#000000</color>
+    <color name="on_tertiary">#000000</color>
+
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>

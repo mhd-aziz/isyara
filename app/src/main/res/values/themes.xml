@@ -3,7 +3,7 @@
     <style name="Theme.IsyaraApplication" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenBackground">@color/primary_blue</item>
 
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
 
