@@ -42,7 +42,7 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
-    private fun loadProfile() {
+    internal fun loadProfile() {
         viewModelScope.launch {
             profileRepository.loadUserProfile().collect { state ->
                 if (state is State.Success) {

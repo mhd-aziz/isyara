@@ -36,7 +36,7 @@ sealed class BottomNavItem(
     object Translate : BottomNavItem(
         title = "Penerjemah",
         route = "translate",
-        drawableId = R.drawable.logo_isyara_putih
+        drawableId = R.drawable.logo_isyara_putih_main
     )
 
     object History : BottomNavItem(
