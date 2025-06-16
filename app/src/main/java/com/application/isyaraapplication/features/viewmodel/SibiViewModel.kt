@@ -5,6 +5,7 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.application.isyaraapplication.core.State
+import com.application.isyaraapplication.data.repository.HistoryRepository
 import com.application.isyaraapplication.data.repository.TranslateRepository
 import com.application.isyaraapplication.features.translate.utils.HandLandmarkerHelper
 import com.application.isyaraapplication.features.translate.utils.SibiInterpreterHelper
@@ -28,7 +29,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SibiViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val translateRepository: TranslateRepository
+    private val translateRepository: TranslateRepository,
+    private val historyRepository: HistoryRepository
 ) : ViewModel(), HandLandmarkerHelper.LandmarkerListener, CameraViewModel {
 
     private val _uiState = MutableStateFlow(TranslatorUiState())
@@ -143,24 +145,26 @@ class SibiViewModel @Inject constructor(
     }
 
     private suspend fun spellCheck() {
-        withContext(Dispatchers.Main) {
-            _uiState.update { it.copy(isSpellChecking = true) }
-        }
-        val result = translateRepository.spellCheck(_uiState.value.fullPrediction)
-        withContext(Dispatchers.Main) {
-            when (result) {
-                is State.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            fullPrediction = result.data,
-                            isSpellChecking = false
-                        )
-                    }
-                }
+        val originalText = _uiState.value.fullPrediction
+        if (originalText.trim().isBlank()) return
 
-                is State.Error -> onError(result.message)
-                else -> _uiState.update { it.copy(isSpellChecking = false) }
+        _uiState.update { it.copy(isSpellChecking = true) }
+        val result = translateRepository.spellCheck(originalText)
+        _uiState.update { it.copy(isSpellChecking = false) }
+
+        if (result is State.Success) {
+            val correctedText = result.data
+            _uiState.update { it.copy(fullPrediction = correctedText) }
+
+            viewModelScope.launch {
+                historyRepository.addHistory(
+                    originalText = originalText.trim(),
+                    correctedText = correctedText,
+                    modelType = "SIBI"
+                )
             }
+        } else if (result is State.Error) {
+            onError(result.message)
         }
     }
 

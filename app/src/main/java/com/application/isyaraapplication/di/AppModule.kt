@@ -1,7 +1,10 @@
 package com.application.isyaraapplication.di
 
 import android.content.Context
+import androidx.room.Room
 import com.application.isyaraapplication.BuildConfig
+import com.application.isyaraapplication.data.local.AppDatabase
+import com.application.isyaraapplication.data.local.HistoryDao
 import com.application.isyaraapplication.data.local.UserPreferencesRepository
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -51,5 +54,21 @@ object AppModule {
             modelName = "gemini-2.0-flash",
             apiKey = BuildConfig.GEMINI_API_KEY
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            "isyara_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryDao(database: AppDatabase): HistoryDao {
+        return database.historyDao()
     }
 }
