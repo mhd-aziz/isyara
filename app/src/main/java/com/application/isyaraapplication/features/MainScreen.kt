@@ -34,8 +34,8 @@ fun MainScreen(appNavController: NavHostController) {
         bottomBar = {
             val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
-            val fabSize = 54.dp
-            val bottomBarHeight = 68.dp
+            val fabSize = 56.dp
+            val bottomBarHeight = 62.dp
 
             val isTranslateSelected = currentDestination?.route == BottomNavItem.Translate.route
             val fabTextColor by animateColorAsState(
@@ -127,13 +127,13 @@ fun MainScreen(appNavController: NavHostController) {
                         Icon(
                             painter = painterResource(id = item.drawableId),
                             contentDescription = item.title,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     } else if (item.imageVector != null) {
                         Icon(
                             imageVector = item.imageVector,
                             contentDescription = item.title,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }

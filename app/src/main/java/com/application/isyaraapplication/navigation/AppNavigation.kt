@@ -23,12 +23,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.application.isyaraapplication.MainActivity
 import com.application.isyaraapplication.features.MainScreen
-import com.application.isyaraapplication.features.viewmodel.AuthViewModel
 import com.application.isyaraapplication.features.auth.ForgotPasswordScreen
 import com.application.isyaraapplication.features.auth.LoginScreen
 import com.application.isyaraapplication.features.auth.RegisterScreen
-import com.application.isyaraapplication.features.dictionary.BisindoWordScreen
 import com.application.isyaraapplication.features.dictionary.BisindoAlfabetScreen
+import com.application.isyaraapplication.features.dictionary.BisindoWordScreen
 import com.application.isyaraapplication.features.dictionary.SibiAlfabetScreen
 import com.application.isyaraapplication.features.dictionary.SibiWordScreen
 import com.application.isyaraapplication.features.dictionary.VideoPlayerScreen
@@ -42,8 +41,8 @@ import com.application.isyaraapplication.features.settings.LanguageScreen
 import com.application.isyaraapplication.features.translate.BISINDOScreen
 import com.application.isyaraapplication.features.translate.SIBIScreen
 import com.application.isyaraapplication.features.translate.utils.GuideScreen
+import com.application.isyaraapplication.features.viewmodel.AuthViewModel
 import dagger.hilt.android.EntryPointAccessors
-import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 @Composable
