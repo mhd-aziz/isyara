@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.application.isyaraapplication.R
 import com.application.isyaraapplication.core.State
 import com.application.isyaraapplication.features.viewmodel.AuthViewModel
@@ -111,7 +112,10 @@ fun LoginScreen(
             is State.Success -> {
                 Toast.makeText(context, "Login Berhasil!", Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.Dashboard.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 }
             }
 
@@ -153,11 +157,10 @@ fun LoginScreen(
                     .weight(1f)
                     .padding(24.dp)
                     .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             )
             {
-                Spacer(modifier = Modifier.height(32.dp))
-
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -205,20 +208,21 @@ fun LoginScreen(
                     OutlinedButton(
                         onClick = {
                             coroutineScope.launch {
-                                try {
-                                    val signInIntentSender = signInClient.beginSignIn(
-                                        BeginSignInRequest.builder()
-                                            .setGoogleIdTokenRequestOptions(
-                                                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                                                    .setSupported(true)
-                                                    .setServerClientId(serverClientId)
-                                                    .setFilterByAuthorizedAccounts(false)
-                                                    .build()
-                                            )
-                                            .setAutoSelectEnabled(true)
-                                            .build()
-                                    ).await()
+                                val googleIdTokenRequestOptions =
+                                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                        .setSupported(true)
+                                        .setServerClientId(serverClientId)
+                                        .setFilterByAuthorizedAccounts(false)
+                                        .build()
 
+                                val autoSelectRequest = BeginSignInRequest.builder()
+                                    .setGoogleIdTokenRequestOptions(googleIdTokenRequestOptions)
+                                    .setAutoSelectEnabled(true)
+                                    .build()
+
+                                try {
+                                    val signInIntentSender =
+                                        signInClient.beginSignIn(autoSelectRequest).await()
                                     launcher.launch(
                                         IntentSenderRequest.Builder(
                                             signInIntentSender?.pendingIntent?.intentSender
@@ -230,11 +234,39 @@ fun LoginScreen(
                                         ).build()
                                     )
                                 } catch (e: Exception) {
-                                    Toast.makeText(
-                                        context,
-                                        "Gagal memulai login Google: ${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    if (e is ApiException) {
+                                        val manualRequest = BeginSignInRequest.builder()
+                                            .setGoogleIdTokenRequestOptions(
+                                                googleIdTokenRequestOptions
+                                            )
+                                            .build()
+                                        try {
+                                            val signInIntentSender =
+                                                signInClient.beginSignIn(manualRequest).await()
+                                            launcher.launch(
+                                                IntentSenderRequest.Builder(
+                                                    signInIntentSender?.pendingIntent?.intentSender
+                                                        ?: throw ApiException(
+                                                            com.google.android.gms.common.api.Status(
+                                                                CommonStatusCodes.INTERNAL_ERROR
+                                                            )
+                                                        )
+                                                ).build()
+                                            )
+                                        } catch (e2: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                "Gagal memulai login Google: ${e2.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Gagal memulai login Google: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
                         },
@@ -259,7 +291,6 @@ fun LoginScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-
                     }
                 }
 
