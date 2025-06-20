@@ -110,7 +110,7 @@ fun RegisterScreen(
             is State.Success -> {
                 Toast.makeText(context, "Registrasi Berhasil!", Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.Dashboard.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+                    popUpTo(Screen.Register.route) { inclusive = true }
                 }
             }
 
@@ -151,7 +151,8 @@ fun RegisterScreen(
                     .weight(1f)
                     .padding(24.dp)
                     .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
                     value = email,
@@ -192,19 +193,21 @@ fun RegisterScreen(
                     OutlinedButton(
                         onClick = {
                             coroutineScope.launch {
+                                val googleIdTokenRequestOptions =
+                                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                                        .setSupported(true)
+                                        .setServerClientId(serverClientId)
+                                        .setFilterByAuthorizedAccounts(false)
+                                        .build()
+
+                                val autoSelectRequest = BeginSignInRequest.builder()
+                                    .setGoogleIdTokenRequestOptions(googleIdTokenRequestOptions)
+                                    .setAutoSelectEnabled(true)
+                                    .build()
+
                                 try {
-                                    val signInIntentSender = signInClient.beginSignIn(
-                                        BeginSignInRequest.builder()
-                                            .setGoogleIdTokenRequestOptions(
-                                                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                                                    .setSupported(true)
-                                                    .setServerClientId(serverClientId)
-                                                    .setFilterByAuthorizedAccounts(false)
-                                                    .build()
-                                            )
-                                            .setAutoSelectEnabled(true)
-                                            .build()
-                                    ).await()
+                                    val signInIntentSender =
+                                        signInClient.beginSignIn(autoSelectRequest).await()
                                     launcher.launch(
                                         IntentSenderRequest.Builder(
                                             signInIntentSender?.pendingIntent?.intentSender
@@ -216,11 +219,39 @@ fun RegisterScreen(
                                         ).build()
                                     )
                                 } catch (e: Exception) {
-                                    Toast.makeText(
-                                        context,
-                                        "Gagal memulai daftar Google: ${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    if (e is ApiException) {
+                                        val manualRequest = BeginSignInRequest.builder()
+                                            .setGoogleIdTokenRequestOptions(
+                                                googleIdTokenRequestOptions
+                                            )
+                                            .build()
+                                        try {
+                                            val signInIntentSender =
+                                                signInClient.beginSignIn(manualRequest).await()
+                                            launcher.launch(
+                                                IntentSenderRequest.Builder(
+                                                    signInIntentSender?.pendingIntent?.intentSender
+                                                        ?: throw ApiException(
+                                                            com.google.android.gms.common.api.Status(
+                                                                CommonStatusCodes.INTERNAL_ERROR
+                                                            )
+                                                        )
+                                                ).build()
+                                            )
+                                        } catch (e2: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                "Gagal memulai daftar Google: ${e2.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Gagal memulai daftar Google: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
                         },
@@ -251,7 +282,11 @@ fun RegisterScreen(
                 Spacer(Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Sudah punya akun?")
-                    TextButton(onClick = { navController.popBackStack() }) {
+                    TextButton(onClick = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Register.route) { inclusive = true }
+                        }
+                    }) {
                         Text("Login di sini")
                     }
                 }

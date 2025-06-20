@@ -7,8 +7,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,11 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -87,24 +82,14 @@ fun OnboardingScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            if (pagerState.currentPage == pages.lastIndex) {
-                OnboardingActions(
-                    onLoginClicked = {
-                        viewModel.setOnboardingCompleted()
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                        }
-                    },
-                    onRegisterClicked = {
-                        viewModel.setOnboardingCompleted()
-                        navController.navigate(Screen.Register.route) {
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                        }
+            OnboardingActions(
+                onStartClicked = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
-                )
-            } else {
-                Spacer(modifier = Modifier.height(130.dp))
-            }
+                    viewModel.setOnboardingCompleted()
+                }
+            )
         }
     }
 }
@@ -165,9 +150,8 @@ fun PagerIndicator(pagerState: PagerState, modifier: Modifier = Modifier) {
 }
 
 
-@Suppress("DEPRECATION")
 @Composable
-private fun OnboardingActions(onLoginClicked: () -> Unit, onRegisterClicked: () -> Unit) {
+private fun OnboardingActions(onStartClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,45 +159,14 @@ private fun OnboardingActions(onLoginClicked: () -> Unit, onRegisterClicked: () 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = onLoginClicked,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            onClick = onStartClicked,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
         ) {
-            Text(text = "Masuk", modifier = Modifier.padding(vertical = 8.dp))
+            Text(text = "Mulai", modifier = Modifier.padding(vertical = 8.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val annotatedText = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                append("Belum punya akun? ")
-            }
-
-            pushStringAnnotation(tag = "REGISTER", annotation = "register")
-            withStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append("Daftar dulu")
-            }
-            pop()
-        }
-
-        ClickableText(
-            text = annotatedText,
-            style = MaterialTheme.typography.bodyLarge,
-            onClick = { offset ->
-                annotatedText.getStringAnnotations(tag = "REGISTER", start = offset, end = offset)
-                    .firstOrNull()?.let {
-                        onRegisterClicked()
-                    }
-            }
-        )
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
