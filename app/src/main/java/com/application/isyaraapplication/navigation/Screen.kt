@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
     object SibiWord : Screen("sibi_word_screen")
     object BisindoAlfabet : Screen("bisindo_alfabet_screen")
     object BisindoWord : Screen("bisindo_word_screen")
+    object Chatbot : Screen("chatbot")
     object VideoPlayer : Screen("video_player_screen/{videoUrl}") {
         fun createRoute(videoUrl: String): String {
             val encodedUrl = Base64.encodeToString(videoUrl.toByteArray(), Base64.URL_SAFE)
