@@ -265,7 +265,6 @@ private fun BannerCarousel() {
     }
 }
 
-
 @Composable
 private fun TranslatorActionCard(navController: NavController) {
     Card(
@@ -368,7 +367,7 @@ private fun QuickAccessSection(navController: NavController) {
                     modifier = Modifier.weight(1f),
                     label = "Chatbot",
                     icon = Icons.AutoMirrored.Filled.Chat,
-                    onClick = { /* TODO: Implement Chatbot Navigation */ }
+                    onClick = { navController.navigate(Screen.Chatbot.route) }
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -410,7 +409,6 @@ private fun QuickAccessItem(
         )
     }
 }
-
 
 @Composable
 fun SignOfTheDayCard(

@@ -26,6 +26,7 @@ import com.application.isyaraapplication.features.MainScreen
 import com.application.isyaraapplication.features.auth.ForgotPasswordScreen
 import com.application.isyaraapplication.features.auth.LoginScreen
 import com.application.isyaraapplication.features.auth.RegisterScreen
+import com.application.isyaraapplication.features.dashboard.ChatbotScreen
 import com.application.isyaraapplication.features.dictionary.BisindoAlfabetScreen
 import com.application.isyaraapplication.features.dictionary.BisindoWordScreen
 import com.application.isyaraapplication.features.dictionary.SibiAlfabetScreen
@@ -148,6 +149,9 @@ fun AppNavigation() {
         }
         composable(route = Screen.BisindoWord.route) {
             BisindoWordScreen(navController = navController)
+        }
+        composable(Screen.Chatbot.route) {
+            ChatbotScreen(navController = navController)
         }
 
         composable(
