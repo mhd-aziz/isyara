@@ -33,9 +33,6 @@ class DictionaryRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun getDownloadUrl(path: String): String {
-        return storage.reference.child(path).downloadUrl.await().toString()
-    }
 
     fun getSibiAlfabet(): Flow<State<List<DictionaryItem>>> = flow {
         emit(State.Loading)
@@ -53,4 +50,43 @@ class DictionaryRepository @Inject constructor(
             emit(State.Error(e.message ?: "Gagal memuat data alfabet SIBI"))
         }
     }.flowOn(Dispatchers.IO)
+
+    fun getBisindoWordList(): Flow<State<List<DictionaryItem>>> = flow {
+        emit(State.Loading)
+        try {
+            val listResult = storage.reference.child("bisindo_kata").listAll().await()
+            val items = listResult.items.map { item ->
+                DictionaryItem(
+                    name = item.name.substringBeforeLast('.'),
+                    url = item.path,
+                    type = ItemType.VIDEO
+                )
+            }
+            emit(State.Success(items))
+        } catch (e: Exception) {
+            emit(State.Error(e.message ?: "Gagal memuat daftar kata BISINDO"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun getBisindoAlfabet(): Flow<State<List<DictionaryItem>>> = flow {
+        emit(State.Loading)
+        try {
+            val listResult = storage.reference.child("bisindo_huruf").listAll().await()
+            val items = listResult.items.map { item ->
+                DictionaryItem(
+                    name = item.name.substringBeforeLast('.'),
+                    url = item.path,
+                    type = ItemType.IMAGE
+                )
+            }
+            emit(State.Success(items))
+        } catch (e: Exception) {
+            emit(State.Error(e.message ?: "Gagal memuat data alfabet BISINDO"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getDownloadUrl(path: String): String {
+        return storage.reference.child(path).downloadUrl.await().toString()
+    }
+
 }

@@ -29,7 +29,7 @@ class ChatbotViewModel : ViewModel() {
     """.trimIndent()
 
     private val generativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash-latest",
+        modelName = "models/gemini-2.5-flash-lite",
         apiKey = BuildConfig.GEMINI_API_KEY,
         systemInstruction = content(role = "system") { text(systemPrompt) }
     )
