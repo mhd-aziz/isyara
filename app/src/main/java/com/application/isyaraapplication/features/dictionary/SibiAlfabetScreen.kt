@@ -141,7 +141,7 @@ fun SibiAlfabetScreen(
 }
 
 @Composable
-private fun AlphabetCard(
+internal fun AlphabetCard(
     item: DictionaryItem,
     viewModel: DictionaryViewModel,
     onClick: (String) -> Unit

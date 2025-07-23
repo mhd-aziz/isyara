@@ -22,6 +22,12 @@ class DictionaryViewModel @Inject constructor(
     private val _sibiWordState = MutableStateFlow<State<List<DictionaryItem>>>(State.Idle)
     val sibiWordState = _sibiWordState.asStateFlow()
 
+    private val _bisindoAlfabetState = MutableStateFlow<State<List<DictionaryItem>>>(State.Idle)
+    val bisindoAlfabetState = _bisindoAlfabetState.asStateFlow()
+
+    private val _bisindoWordState = MutableStateFlow<State<List<DictionaryItem>>>(State.Idle)
+    val bisindoWordState = _bisindoWordState.asStateFlow()
+
     private val urlCache = mutableMapOf<String, String>()
 
     fun loadSibiAlfabet() {
@@ -36,6 +42,22 @@ class DictionaryViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getSibiWordList().collect {
                 _sibiWordState.value = it
+            }
+        }
+    }
+
+    fun loadBisindoAlfabet() {
+        viewModelScope.launch {
+            repository.getBisindoAlfabet().collect {
+                _bisindoAlfabetState.value = it
+            }
+        }
+    }
+
+    fun loadBisindoWords() {
+        viewModelScope.launch {
+            repository.getBisindoWordList().collect {
+                _bisindoWordState.value = it
             }
         }
     }
